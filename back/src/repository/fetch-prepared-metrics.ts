@@ -22,25 +22,27 @@ export async function fetchPreparedMetrics({
         /* sql */ `
         with lines as (
             with
-            all_ts as (
-                select
-                    time_round(created_at, :aggWindowSec) as timestamp_sec
+            all_all as (
+            	select
+                    *
                 from metrics
                 where "name" = :name
                     and jsonb_contains_all_keys_and_values((:labels)::jsonb, labels)
-                    and created_at >= to_timestamp(:fromSec)
-                    and created_at <= to_timestamp(:toSec)
+                    and created_at >= :fromSec
+                    and created_at <= :toSec
+                order by created_at
+            ),
+            all_ts as (
+                select
+                    time_round(created_at, :aggWindowSec) as timestamp_sec
+                from all_all
                 group by timestamp_sec
                 order by timestamp_sec
             ),
             all_mx as (
                 select
                     "name", labels
-                from metrics
-                where "name" = :name
-                    and jsonb_contains_all_keys_and_values((:labels)::jsonb, labels)
-                    and created_at >= to_timestamp(:fromSec)
-                    and created_at <= to_timestamp(:toSec)
+                from all_all
                 group by name, labels
             ),
             agg_mx as (
@@ -49,11 +51,7 @@ export async function fetchPreparedMetrics({
                     "name",
                     labels,
                     :aggFunction:("value") as "value"
-                from metrics
-                where "name" = :name
-                    and jsonb_contains_all_keys_and_values((:labels)::jsonb, labels)
-                    and created_at >= to_timestamp(:fromSec)
-                    and created_at <= to_timestamp(:toSec)
+                from all_all
                 group by timestamp_sec, "name", labels
             )
             select mx.name, mx.labels, array_agg(m.value) as values from all_ts

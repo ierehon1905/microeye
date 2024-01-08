@@ -8,6 +8,7 @@
 	import { queryParam } from 'sveltekit-search-params';
 
 	import '@gravity-ui/yagr/dist/index.min.css';
+	import type { AggFunction } from '$lib/types';
 
 	const queryName = queryParam('name', {
 		defaultValue: 'cpu',
@@ -66,6 +67,17 @@
 			return value.toString();
 		}
 	});
+	const AGG_FUNCTIONS: AggFunction[] = ['avg', 'min', 'max', 'sum', 'count'];
+	const aggFunction = queryParam<AggFunction>('aggFunction', {
+		defaultValue: 'avg',
+		decode(value) {
+			return value && AGG_FUNCTIONS.includes(value as AggFunction) ? (value as AggFunction) : 'avg';
+		},
+		encode(value) {
+			return value;
+		}
+	});
+
 	let yagr: Yagr;
 
 	let chart: HTMLDivElement;
@@ -77,6 +89,7 @@
 				name: $queryName!,
 				labels: queryLabels,
 				aggWindowSec: $aggWindowSec!,
+				aggFunction: $aggFunction!,
 				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
 			},
 			yagr,
@@ -92,6 +105,7 @@
 						name: $queryName!,
 						labels: queryLabels,
 						aggWindowSec: $aggWindowSec!,
+						aggFunction: $aggFunction!,
 						...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
 					},
 					yagr,
@@ -165,6 +179,15 @@
 	class="input input-bordered"
 	bind:value={$aggWindowSec}
 />
+
+<div class="label">
+	<span class="label-text">Aggregation function</span>
+</div>
+<select class="select select-bordered" bind:value={$aggFunction}>
+	{#each AGG_FUNCTIONS as aggFunction}
+		<option value={aggFunction}>{aggFunction}</option>
+	{/each}
+</select>
 
 <div class="label">
 	<span class="label-text">From</span>

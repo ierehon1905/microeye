@@ -8,10 +8,17 @@ const app = express();
 app.use(cors(), express.json());
 const port = 3000;
 
+const AGG_FUNCTIONS = ["avg", "min", "max", "count", "sum"];
+
 app.post(
     "/metrics",
     async (req: Request<{}, MergedLines, MetricsRequest>, res) => {
-        console.log(req.body);
+        if (
+            req.body.aggFunction &&
+            !AGG_FUNCTIONS.includes(req.body.aggFunction)
+        ) {
+            req.body.aggFunction = undefined;
+        }
 
         const result = await Repository.fetchPreparedMetrics({
             name: req.body.name,

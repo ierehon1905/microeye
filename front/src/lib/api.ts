@@ -1,3 +1,4 @@
+import Yagr from '@gravity-ui/yagr';
 import type { MergedLines, MetricsRequest } from './types';
 
 export async function fetchMetrics({
@@ -25,4 +26,41 @@ export async function fetchMetrics({
 	}).then((res) => res.json());
 
 	return res;
+}
+
+export async function fetchAndDraw(
+	request: MetricsRequest,
+	yagr: Yagr | undefined,
+	chart: HTMLDivElement | undefined
+): Promise<Yagr> {
+	const res = await fetchMetrics(request);
+
+	const series = res.lines.map((line) => {
+		return {
+			id: line.name + JSON.stringify(line.labels),
+			data: line.values,
+			name: line.name + JSON.stringify(line.labels)
+		};
+	});
+
+	if (!yagr) {
+		yagr = new Yagr(chart!, {
+			timeline: res.timestampsSec,
+			series,
+			chart: {
+				timeMultiplier: 0.001,
+				series: {
+					spanGaps: true,
+					type: 'line'
+				}
+			}
+		});
+	} else {
+		yagr.setConfig({
+			timeline: res.timestampsSec,
+			series
+		});
+	}
+
+	return yagr;
 }

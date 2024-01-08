@@ -40,19 +40,22 @@ app.post("/push", async (req: Request<{}, {}, PushMetricsRequest>, res) => {
     res.send();
 });
 
+// curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a":"b"},"value":1}' http://localhost:3000/push
+
 async function main() {
     console.log("Starting server...");
     await connection.migrate.latest();
 
-    const frontHandlerPath =
-        process.env.MICROEYE_FRONT_HANDLER_PATH ||
-        "/Users/leon/dev/microeye/front/build/handler.js";
+    const mustStartFront = process.env.MICROEYE_MUST_START_FRONT === "true";
+    if (mustStartFront) {
+        const frontHandlerPath =
+            process.env.MICROEYE_FRONT_HANDLER_PATH ||
+            "/Users/leon/dev/microeye/front/build/handler.js";
 
-    const { handler } = await import(frontHandlerPath);
+        const { handler } = await import(frontHandlerPath);
 
-    console.log(handler);
-
-    app.use(handler);
+        app.use(handler);
+    }
 
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);

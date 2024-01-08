@@ -57,6 +57,15 @@
 			return value.toString();
 		}
 	});
+	const aggWindowSec = queryParam('aggWindow', {
+		defaultValue: 1,
+		decode(value) {
+			return parseInt(value || '1');
+		},
+		encode(value) {
+			return value.toString();
+		}
+	});
 	let yagr: Yagr;
 
 	let chart: HTMLDivElement;
@@ -67,6 +76,7 @@
 			{
 				name: $queryName!,
 				labels: queryLabels,
+				aggWindowSec: $aggWindowSec!,
 				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
 			},
 			yagr,
@@ -81,6 +91,7 @@
 					{
 						name: $queryName!,
 						labels: queryLabels,
+						aggWindowSec: $aggWindowSec!,
 						...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
 					},
 					yagr,
@@ -96,33 +107,36 @@
 		};
 	});
 
-	$: if ($refreshIntervalSec && $refreshIntervalSec > 0) {
-		clearInterval(refreshIntervalId);
-		refreshIntervalId = setInterval(() => {
-			fetchAndDraw(
-				{
-					name: $queryName!,
-					labels: queryLabels,
-					...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-				},
-				yagr,
-				chart
-			).then((newYagr) => {
-				yagr = newYagr;
-			});
-		}, $refreshIntervalSec * 1000);
-	}
+	// $: if ($refreshIntervalSec && $refreshIntervalSec > 0) {
+	// 	clearInterval(refreshIntervalId);
+	// 	refreshIntervalId = setInterval(() => {
+	// 		fetchAndDraw(
+	// 			{
+	// 				name: $queryName!,
+	// 				labels: queryLabels,
+	// 				aggWindowSec: $aggWindowSec!,
+	// 				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
+	// 			},
+	// 			yagr,
+	// 			chart
+	// 		).then((newYagr) => {
+	// 			yagr = newYagr;
+	// 		});
+	// 	}, $refreshIntervalSec * 1000);
+	// } else {
+	// 	clearInterval(refreshIntervalId);
+	// }
 
-	$: yagr &&
-		fetchAndDraw(
-			{
-				name: $queryName!,
-				labels: queryLabels,
-				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-			},
-			yagr,
-			chart
-		);
+	// $: yagr &&
+	// 	fetchAndDraw(
+	// 		{
+	// 			name: $queryName!,
+	// 			labels: queryLabels,
+	// 			...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
+	// 		},
+	// 		yagr,
+	// 		chart
+	// 	);
 </script>
 
 <h1 class="text-4xl">Microeye</h1>
@@ -141,6 +155,15 @@
 	placeholder="Refresh interval"
 	class="input input-bordered"
 	bind:value={$refreshIntervalSec}
+/>
+<div class="label">
+	<span class="label-text">Aggregation window in s</span>
+</div>
+<input
+	type="number"
+	placeholder="Aggregation window"
+	class="input input-bordered"
+	bind:value={$aggWindowSec}
 />
 
 <div class="label">

@@ -58,10 +58,13 @@ export const Repository = {
         labels: Record<string, string | number>,
         value: number
     ): Promise<void> {
-        await connection<Metrics>("metrics").insert({
-            name,
-            labels,
-            value,
-        });
+        await connection<Metrics>("metrics")
+            .insert({
+                name,
+                labels,
+                value,
+            })
+            .onConflict(["created_at", "name", "labels"])
+            .merge();
     },
 };

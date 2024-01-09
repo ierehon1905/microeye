@@ -4,6 +4,7 @@
 	import Chart from './Chart.svelte';
 
 	export let dashConfig: {
+		id: string;
 		title: string;
 		items: {
 			x: number;
@@ -19,6 +20,7 @@
 			};
 		}[];
 	} = {
+		id: 'test',
 		title: 'test',
 		items: [
 			{

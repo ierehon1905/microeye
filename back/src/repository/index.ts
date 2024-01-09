@@ -1,5 +1,6 @@
+import { IPaginateParams, IWithPagination } from "knex-paginate";
 import { connection } from "../db";
-import { MergedLines } from "../types";
+import { MergedLines, NDashboard } from "../types";
 import { MetricLine, MetricsResponse } from "../types";
 import { fetchPreparedMetrics } from "./fetch-prepared-metrics";
 
@@ -66,5 +67,30 @@ export const Repository = {
             })
             .onConflict(["created_at", "name", "labels"])
             .merge();
+    },
+    async fetchDashboards(
+        pagination: IPaginateParams
+    ): Promise<IWithPagination<NDashboard.Dashboard>> {
+        return await connection<NDashboard.Dashboard>("dashboards").paginate(
+            pagination
+        );
+    },
+    async fetchDashboard(id: string): Promise<NDashboard.Dashboard> {
+        return await connection<NDashboard.Dashboard>("dashboards")
+            .where("id", id)
+            .first();
+    },
+    async createDashboard(dashboard: NDashboard.Dashboard) {
+        await connection<NDashboard.Dashboard>("dashboards").insert(dashboard);
+    },
+    async updateDashboard(dashboard: NDashboard.Dashboard) {
+        await connection<NDashboard.Dashboard>("dashboards")
+            .where("id", dashboard.id)
+            .update(dashboard);
+    },
+    async deleteDashboard(id: string) {
+        await connection<NDashboard.Dashboard>("dashboards")
+            .where("id", id)
+            .delete();
     },
 };

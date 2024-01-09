@@ -1,4 +1,5 @@
 import Knex from "knex";
+import { attachPaginate } from "knex-paginate";
 
 export const connection = Knex({
     client: "postgresql",
@@ -8,3 +9,5 @@ export const connection = Knex({
         password: "postgres",
     },
 });
+
+attachPaginate();

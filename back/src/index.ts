@@ -1,53 +1,21 @@
 import cors from "cors";
-import express, { Request } from "express";
+import express from "express";
 import { connection } from "./db";
-import { Repository } from "./repository";
-import { MergedLines, MetricsRequest } from "./types";
+import { pushMetric } from "./controllers/metrics/push-metric";
+import { fetchMetrics } from "./controllers/metrics/fetch-metrics";
+import { fetchDashboards } from "./controllers/dashboards/fetch-dashboards";
+import { fetchDashboard } from "./controllers/dashboards/fetch-dashboard";
 
 const app = express();
 app.use(cors(), express.json());
 const port = 3000;
 
-const AGG_FUNCTIONS = ["avg", "min", "max", "count", "sum"];
+export const AGG_FUNCTIONS = ["avg", "min", "max", "count", "sum"];
 
-app.post(
-    "/metrics",
-    async (req: Request<{}, MergedLines, MetricsRequest>, res) => {
-        if (
-            req.body.aggFunction &&
-            !AGG_FUNCTIONS.includes(req.body.aggFunction)
-        ) {
-            req.body.aggFunction = undefined;
-        }
-
-        const result = await Repository.fetchPreparedMetrics({
-            name: req.body.name,
-            labels: req.body.labels,
-            fromSec: req.body.fromSec,
-            toSec: req.body.toSec,
-            aggWindowSec: req.body.aggWindowSec,
-            aggFunction: req.body.aggFunction,
-        });
-        res.send(result);
-    }
-);
-
-type PushMetricsRequest = {
-    name: string;
-    labels: Record<string, string>;
-    value: number;
-};
-
-app.post("/push", async (req: Request<{}, {}, PushMetricsRequest>, res) => {
-    await Repository.pushMetrics(
-        req.body.name,
-        req.body.labels,
-        req.body.value
-    );
-    res.send();
-});
-
-// curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a":"b"},"value":1}' http://localhost:3000/push
+app.post("/metrics", fetchMetrics);
+app.post("/push", pushMetric);
+app.get("/dashboards/:id", fetchDashboard);
+app.get("/dashboards", fetchDashboards);
 
 async function main() {
     console.log("Starting server...");

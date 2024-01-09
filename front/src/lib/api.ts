@@ -1,8 +1,9 @@
 import Yagr from '@gravity-ui/yagr';
 import type { MergedLines, MetricsRequest } from './types';
+import { HOST } from './constants';
 
 export async function fetchMetrics(request: MetricsRequest): Promise<MergedLines> {
-	const res: MergedLines = await fetch('http://localhost:3000/metrics', {
+	const res: MergedLines = await fetch(`${HOST}/metrics`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'

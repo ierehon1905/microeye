@@ -2,6 +2,7 @@
 	type ColumnDef = {
 		accessor: keyof T;
 		label: string;
+		fallback?: string;
 	};
 
 	export let columns: ColumnDef[];
@@ -29,7 +30,7 @@
 					on:click={(e) => onRowClick?.(row, e)}
 				>
 					{#each columns as column}
-						<td>{row[column.accessor]}</td>
+						<td>{row[column.accessor] ?? column.fallback ?? ''}</td>
 					{/each}
 				</tr>
 			{/each}

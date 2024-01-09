@@ -26,5 +26,43 @@ export type MergedLines = {
         values: (number | null)[];
     }[];
 };
+
 export type AggFunction = "avg" | "sum" | "min" | "max" | "count";
 export type Labels = Record<string, string | number>;
+
+export namespace NDashboard {
+    export type Dashboard = {
+        id: string;
+        title: string;
+        items: DashboardItem[];
+    };
+
+    export type DashboardItem = {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+        id: string;
+        chart: Chart;
+    };
+
+    export type Chart = {
+        name: string;
+        labels: Labels;
+        aggWindowSec: number;
+        aggFunction: AggFunction;
+    };
+}
+
+export type PushMetricRequest = {
+    name: string;
+    labels: Record<string, string>;
+    value: number;
+};
+
+// export type PaginatedResponse<T> = {
+//     total: number;
+//     items: T[];
+//     page: number;
+//     size: number;
+// };

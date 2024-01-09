@@ -5,6 +5,8 @@ import { pushMetric } from "./controllers/metrics/push-metric";
 import { fetchMetrics } from "./controllers/metrics/fetch-metrics";
 import { fetchDashboards } from "./controllers/dashboards/fetch-dashboards";
 import { fetchDashboard } from "./controllers/dashboards/fetch-dashboard";
+import { updateDashboard } from "./controllers/dashboards/update-dashboard";
+import { deleteDashboard } from "./controllers/dashboards/delete-dashboard";
 
 const app = express();
 app.use(cors(), express.json());
@@ -15,6 +17,8 @@ export const AGG_FUNCTIONS = ["avg", "min", "max", "count", "sum"];
 app.post("/metrics", fetchMetrics);
 app.post("/push", pushMetric);
 app.get("/dashboards/:id", fetchDashboard);
+app.post("/dashboards/:id", updateDashboard);
+app.delete("/dashboards/:id", deleteDashboard);
 app.get("/dashboards", fetchDashboards);
 
 async function main() {

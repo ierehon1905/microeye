@@ -1,5 +1,11 @@
 import Yagr from '@gravity-ui/yagr';
-import type { MergedLines, MetricsRequest } from './types';
+import type {
+	IPaginateParams,
+	IWithPagination,
+	MergedLines,
+	MetricsRequest,
+	NDashboard
+} from './types';
 import { HOST } from './constants';
 
 export async function fetchMetrics(request: MetricsRequest): Promise<MergedLines> {
@@ -49,4 +55,48 @@ export async function fetchAndDraw(
 	}
 
 	return yagr;
+}
+
+export async function fetchDashboard(dashId: string): Promise<NDashboard.Dashboard> {
+	const res = await fetch(`${HOST}/dashboards/${dashId}`).then((res) => res.json());
+
+	return res;
+}
+
+export async function fetchDashboards(): Promise<IWithPagination<NDashboard.Dashboard>> {
+	const res = await fetch(`${HOST}/dashboards`).then((res) => res.json());
+
+	return res;
+}
+
+export async function updateDashboard(
+	dashId: string,
+	dashboard: NDashboard.DashboardUpdate
+): Promise<void> {
+	await fetch(`${HOST}/dashboards/${dashId}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(dashboard)
+	});
+}
+
+export async function createDashboard(dashboard: NDashboard.DashboardCreate): Promise<void> {
+	await fetch(`${HOST}/dashboards`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(dashboard)
+	});
+}
+
+export async function deleteDashboard(dashId: string): Promise<void> {
+	await fetch(`${HOST}/dashboards/${dashId}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
 }

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { fetchDashboards } from '$lib/api';
+	import IdiomaticTable from '$lib/components/IdiomaticTable.svelte';
 	import Table from '$lib/components/Table.svelte';
-	import { HOST } from '$lib/constants';
-	import { onMount } from 'svelte';
+	import DateCell from '$lib/components/table-cells/DateCell.svelte';
 
-	let dashboardsPromise: Promise<any> = fetch(`${HOST}/dashboards`).then((res) => res.json());
-	// });
+	let dashboardsPromise = fetchDashboards();
 </script>
 
 <main class="p-4">
@@ -25,10 +25,12 @@
 		{#if dashboards.data.length === 0}
 			<p>No dashboards found</p>
 		{:else}
-			<Table
+			<IdiomaticTable
 				columns={[
+					{ accessor: 'id', label: 'ID', fallback: '-' },
 					{ accessor: 'title', label: 'Name' },
-					{ accessor: 'description', label: 'Description', fallback: '-' }
+					{ accessor: 'created_at', label: 'Created at', fallback: '-', component: DateCell },
+					{ accessor: 'updated_at', label: 'Updated at', fallback: '-', component: DateCell }
 				]}
 				data={dashboards.data}
 				onRowClick={(row, e) => {

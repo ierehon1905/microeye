@@ -80,13 +80,19 @@ export const Repository = {
             .where("id", id)
             .first();
     },
-    async createDashboard(dashboard: NDashboard.Dashboard) {
+    async createDashboard(dashboard: NDashboard.DashboardCreate) {
         await connection<NDashboard.Dashboard>("dashboards").insert(dashboard);
     },
-    async updateDashboard(dashboard: NDashboard.Dashboard) {
+    async updateDashboard(id: string, dashboard: NDashboard.DashboardUpdate) {
         await connection<NDashboard.Dashboard>("dashboards")
-            .where("id", dashboard.id)
-            .update(dashboard);
+            .where("id", id)
+            .update({
+                // @ts-ignore
+                items: JSON.stringify(dashboard.items),
+                title: dashboard.title,
+                version: dashboard.version + 1,
+                updated_at: connection.fn.now(),
+            });
     },
     async deleteDashboard(id: string) {
         await connection<NDashboard.Dashboard>("dashboards")

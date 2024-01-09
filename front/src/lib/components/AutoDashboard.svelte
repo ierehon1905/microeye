@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { HOST } from '$lib/constants';
+	import { fetchDashboard } from '$lib/api';
 	import AutoChart from './AutoChart.svelte';
 
 	export let dashId: string;
 
-	let dashConfigPromise: Promise<any> = fetch(`${HOST}/dashboards/${dashId}`).then((res) =>
-		res.json()
-	);
+	let dashConfigPromise: Promise<any> = fetchDashboard(dashId);
 
 	export let fromSec: number;
 	export let toSec: number;

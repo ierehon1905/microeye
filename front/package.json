@@ -36,6 +36,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@gravity-ui/yagr": "^4.1.0"
+		"@gravity-ui/yagr": "^4.1.0",
+		"@mariojgt/wind-notify": "^0.1.2",
+		"svelte-jsoneditor": "^0.21.1"
 	}
 }

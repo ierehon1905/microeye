@@ -35,6 +35,21 @@ export namespace NDashboard {
         id: string;
         title: string;
         items: DashboardItem[];
+        version: number;
+        created_at: Date;
+        updated_at: Date;
+    };
+
+    export type DashboardCreate = {
+        id: string;
+        title: string;
+        items: DashboardItem[];
+    };
+
+    export type DashboardUpdate = {
+        title: string;
+        items: DashboardItem[];
+        version: number;
     };
 
     export type DashboardItem = {

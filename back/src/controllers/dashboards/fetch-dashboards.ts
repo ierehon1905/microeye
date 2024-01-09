@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { Repository } from "../../repository";
-import { MergedLines, MetricsRequest } from "../../types";
-import { AGG_FUNCTIONS } from "../..";
 
 export async function fetchDashboards(
     req: Request<{}, any, any>,

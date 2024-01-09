@@ -20,6 +20,5 @@
 		</ul>
 	</div>
 
-	<!-- <Chart /> -->
-	<AutoDashboard dashId={id} fromSec={nowSec(-999999)} toSec={nowSec()} refreshIntervalSec={1} />
+	<AutoDashboard dashId={id} fromSec={nowSec(-60)} toSec={nowSec()} refreshIntervalSec={1} />
 </main>

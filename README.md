@@ -15,3 +15,5 @@ To push metrics run
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a":"b"},"value":1}' http://localhost:3000/push
 ```
+
+or use example pushers from `./pusher` directory.

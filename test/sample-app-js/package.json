@@ -1,0 +1,12 @@
+{
+  "name": "sample-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.cjs",
+  "scripts": {
+    "test:cjs": "node index.cjs",
+    "test:esm": "node --es-module-specifier-resolution=node index.mjs"
+  },
+  "author": "",
+  "license": "ISC"
+}

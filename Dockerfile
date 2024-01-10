@@ -41,7 +41,7 @@ RUN chown -R postgres: /run/postgresql
 USER postgres
 
 RUN initdb -D /var/lib/postgresql/data
-
+VOLUME /var/lib/postgresql/data
 
 
 USER root

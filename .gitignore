@@ -1,3 +1,4 @@
 node_modules/
 dist/
 pg_data_test
+.DS_Store

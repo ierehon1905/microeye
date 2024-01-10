@@ -23,7 +23,7 @@ export async function fetchPreparedMetrics({
         with lines as (
             with
             all_all as (
-            	select
+                select
                     *
                 from metrics
                 where "name" = :name

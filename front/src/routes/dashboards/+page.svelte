@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { fetchDashboards } from '$lib/api';
+	import { deleteDashboard, fetchDashboards } from '$lib/api';
 	import IdiomaticTable from '$lib/components/IdiomaticTable.svelte';
-	import Table from '$lib/components/Table.svelte';
 	import DateCell from '$lib/components/table-cells/DateCell.svelte';
 
 	let dashboardsPromise = fetchDashboards();
 </script>
 
 <main class="p-4">
-	<a class="text-4xl link link-hover" href="/">Microeye</a>
+	<div class="flex justify-between">
+		<a class="text-4xl link link-hover" href="/">Microeye</a>
+		<button class="btn btn-primary">Create dashboard</button>
+	</div>
 
 	<div class="breadcrumbs">
 		<ul>
@@ -26,6 +28,7 @@
 			<p>No dashboards found</p>
 		{:else}
 			<IdiomaticTable
+				inlineBlock
 				columns={[
 					{ accessor: 'id', label: 'ID', fallback: '-' },
 					{ accessor: 'title', label: 'Name' },
@@ -36,6 +39,21 @@
 				onRowClick={(row, e) => {
 					goto(`/dashboards/${row.title}`);
 				}}
+				actions={[
+					{
+						label: 'Edit',
+						onClick: (row) => {
+							goto(`/dashboards/${row.title}/edit`);
+						}
+					},
+					{
+						label: 'Delete',
+						onClick: (row) => {
+							deleteDashboard(row.id);
+							dashboardsPromise = fetchDashboards();
+						}
+					}
+				]}
 			/>
 		{/if}
 	{:catch error}

@@ -39,3 +39,22 @@ class Pusher {
 
 export default Pusher;
 ```
+
+## Docker compose
+
+```yaml
+services:
+  # ...
+  monitoring:
+    image: ierehon1905/microeye:latest
+    ports:
+      - "30000:3000"
+    volumes:
+      - monitoring_data:/var/lib/postgresql/data
+
+volumes:
+  # ...
+  monitoring_data:
+```
+
+And then use `http://monitoring:3000` as host to push metrics.

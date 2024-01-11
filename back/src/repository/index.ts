@@ -1,16 +1,8 @@
 import { IPaginateParams, IWithPagination } from "knex-paginate";
 import { connection } from "../db";
-import { MergedLines, NDashboard } from "../types";
-import { MetricLine, MetricsResponse } from "../types";
+import { MetricLine, NDashboard } from "../types";
 import { fetchPreparedMetrics } from "./fetch-prepared-metrics";
 
-// CREATE TABLE metrics (
-//     created_at timestamp not null default now(),
-//     "name" varchar(255) not null,
-//     labels jsonb not null default '{}',
-//     "value" float not null,
-//     PRIMARY KEY (created_at, "name", labels)
-// );
 type Metrics = {
     created_at: Date;
     name: string;
@@ -98,5 +90,13 @@ export const Repository = {
         await connection<NDashboard.Dashboard>("dashboards")
             .where("id", id)
             .delete();
+    },
+    async fetchMetricsNames(): Promise<string[]> {
+        const result = await connection.raw(/* sql */ `
+            SELECT DISTINCT "name"
+            FROM metrics
+        `);
+
+        return result.rows.map((row) => row.name);
     },
 };

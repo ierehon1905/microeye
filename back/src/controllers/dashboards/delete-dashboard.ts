@@ -1,7 +1,16 @@
 import { Request, Response } from "express";
 import { Repository } from "../../repository";
+import { createValidationGuard } from "../../utilities/validate";
 
-export async function deleteDashboard(
+const validateDeleteDashboard = createValidationGuard({
+    id: {
+        in: ["params"],
+        isString: true,
+        notEmpty: true,
+    },
+});
+
+async function deleteDashboard(
     req: Request<
         {
             id: string;
@@ -14,3 +23,5 @@ export async function deleteDashboard(
     const result = await Repository.deleteDashboard(req.params.id);
     res.send(result);
 }
+
+export default [validateDeleteDashboard, deleteDashboard];

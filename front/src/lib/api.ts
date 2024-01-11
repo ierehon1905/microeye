@@ -100,3 +100,9 @@ export async function deleteDashboard(dashId: string): Promise<void> {
 		}
 	});
 }
+
+export async function fetchMetricsNames(): Promise<string[]> {
+	const res = await fetch(`${HOST}/metrics/names`).then((res) => res.json());
+
+	return res;
+}

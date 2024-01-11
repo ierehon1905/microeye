@@ -38,6 +38,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Microeye | Dashboards | {dashId} | Edit</title>
+</svelte:head>
+
 <svelte:window on:beforeunload={unload} />
 
 <main class="p-4">

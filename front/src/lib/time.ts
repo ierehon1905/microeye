@@ -11,10 +11,9 @@ export function getAbsoluteTime(
 	toSec: number;
 } {
 	if (isRelative) {
-		const diff = toSec - fromSec;
 		return {
-			fromSec: nowSec(-diff),
-			toSec: nowSec()
+			fromSec: nowSec(-fromSec),
+			toSec: nowSec(-toSec)
 		};
 	} else {
 		return {

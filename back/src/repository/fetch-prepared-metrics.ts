@@ -33,11 +33,17 @@ export async function fetchPreparedMetrics({
                 order by created_at
             ),
             all_ts as (
-                select
-                    time_round(created_at, :aggWindowSec) as timestamp_sec
-                from all_all
-                group by timestamp_sec
-                order by timestamp_sec
+                select time_round(:fromSec ::int4, :aggWindowSec) as timestamp_sec
+                union all
+                (
+                    select
+                        time_round(created_at, :aggWindowSec) as timestamp_sec
+                    from all_all
+                    group by timestamp_sec
+                    order by timestamp_sec
+                )
+                union all
+                select time_round(:toSec ::int4, :aggWindowSec)
             ),
             all_mx as (
                 select

@@ -3,128 +3,47 @@
 	import Yagr from '@gravity-ui/yagr';
 	import { onMount } from 'svelte';
 
-	import { fetchAndDraw } from '$lib/api';
+	import { fetchAndDraw, fetchMetricsNames } from '$lib/api';
 	import { getAbsoluteTime, nowSec } from '$lib/time';
-	import { queryParam } from 'sveltekit-search-params';
 
 	import '@gravity-ui/yagr/dist/index.min.css';
-	import type { AggFunction } from '$lib/types';
 
-	const queryName = queryParam(
-		'name',
-		{
-			defaultValue: 'cpu',
-			decode(value) {
-				return value || '';
-			},
-			encode(value) {
-				return value;
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
-	const refreshIntervalSec = queryParam(
-		'refresh',
-		{
-			defaultValue: 1,
-			decode(value) {
-				return parseInt(value || '0');
-			},
-			encode(value) {
-				return value.toString();
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
-	const isRelative = queryParam(
-		'relative',
-		{
-			defaultValue: true,
-			decode(value) {
-				return value === '1';
-			},
-			encode(value) {
-				return value ? '1' : '0';
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
+	import { AGG_FUNCTIONS } from '$lib/constants';
+	import {
+		aggFunction,
+		aggWindowSec,
+		fromSec,
+		isRelative,
+		queryName,
+		refreshIntervalSec,
+		toSec
+	} from './params';
 
 	let refreshIntervalId: number | undefined;
 	let queryLabels: Record<string, string | number> = {};
-	const fromSec = queryParam(
-		'from',
-		{
-			defaultValue: nowSec(-60),
-			decode(value) {
-				return parseInt(value || '0');
-			},
-			encode(value) {
-				return value.toString();
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
-	const toSec = queryParam(
-		'to',
-		{
-			defaultValue: nowSec(),
-			decode(value) {
-				return parseInt(value || '0');
-			},
-			encode(value) {
-				return value.toString();
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
-	const aggWindowSec = queryParam(
-		'aggWindow',
-		{
-			defaultValue: 1,
-			decode(value) {
-				return parseInt(value || '1');
-			},
-			encode(value) {
-				return value.toString();
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
-	const AGG_FUNCTIONS: AggFunction[] = ['avg', 'min', 'max', 'sum', 'count'];
-	const aggFunction = queryParam<AggFunction>(
-		'aggFunction',
-		{
-			defaultValue: 'avg',
-			decode(value) {
-				return value && AGG_FUNCTIONS.includes(value as AggFunction)
-					? (value as AggFunction)
-					: 'avg';
-			},
-			encode(value) {
-				return value;
-			}
-		},
-		{
-			pushHistory: false
-		}
-	);
 
 	let yagr: Yagr;
 
 	let chart: HTMLDivElement;
+
+	let metricsNames: string[] = [];
+
+	function runRefresh() {
+		clearInterval(refreshIntervalId);
+		refreshIntervalId = setInterval(() => {
+			fetchAndDraw(
+				{
+					name: $queryName!,
+					labels: queryLabels,
+					aggWindowSec: $aggWindowSec!,
+					aggFunction: $aggFunction!,
+					...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
+				},
+				yagr,
+				chart
+			);
+		}, $refreshIntervalSec! * 1000);
+	}
 
 	onMount(() => {
 		$page.url.searchParams.set('weather', 'sunny');
@@ -143,22 +62,15 @@
 		});
 
 		if ($refreshIntervalSec && $refreshIntervalSec > 0) {
-			refreshIntervalId = setInterval(() => {
-				fetchAndDraw(
-					{
-						name: $queryName!,
-						labels: queryLabels,
-						aggWindowSec: $aggWindowSec!,
-						aggFunction: $aggFunction!,
-						...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-					},
-					yagr,
-					chart
-				).then((newYagr) => {
-					yagr = newYagr;
-				});
-			}, $refreshIntervalSec * 1000);
+			runRefresh();
 		}
+
+		fetchMetricsNames().then((names) => {
+			metricsNames = names;
+			if (!names.includes($queryName!)) {
+				$queryName = names[0];
+			}
+		});
 
 		return () => {
 			clearInterval(refreshIntervalId);
@@ -196,56 +108,158 @@
 	// 		yagr,
 	// 		chart
 	// 	);
+
+	let fromDateStr = new Date($fromSec! * 1000).toISOString().replace(/\..*/, '');
+
+	function handleFromChange(e: Event) {
+		$fromSec = new Date((e.target as HTMLInputElement).value).getTime() / 1000;
+	}
+
+	let toDateStr = new Date($toSec! * 1000).toISOString().replace(/\..*/, '');
+
+	function handleToChange(e: Event) {
+		$toSec = new Date((e.target as HTMLInputElement).value).getTime() / 1000;
+	}
+
+	function handleRelativeChange(e: Event) {
+		const checked = (e.target as HTMLInputElement).checked;
+		if (checked) {
+			$fromSec = $toSec! - $fromSec!;
+			$toSec = 0;
+		} else {
+			$fromSec = nowSec(-$fromSec!);
+			$toSec = nowSec();
+		}
+	}
+
+	function handleRefreshIntervalChange(e: Event) {
+		const newRefreshIntervalSec = Number((e.target as HTMLInputElement).value);
+		if (newRefreshIntervalSec > 0) {
+			runRefresh();
+		} else {
+			clearInterval(refreshIntervalId);
+		}
+	}
 </script>
 
-<a class="text-4xl link link-hover" href="/">Microeye</a>
+<svelte:head>
+	<title>Microeye | Space</title>
+</svelte:head>
 
-<div class="w-full h-[300px]">
-	<div bind:this={chart}></div>
-</div>
-<div class="label">
-	<span class="label-text">Name</span>
-</div>
-<input type="text" placeholder="Name" class="input input-bordered w-full" bind:value={$queryName} />
-<div class="label">
-	<span class="label-text">Refresh interval in s</span>
-</div>
-<input
-	type="number"
-	placeholder="Refresh interval"
-	class="input input-bordered"
-	bind:value={$refreshIntervalSec}
-/>
-<div class="label">
-	<span class="label-text">Aggregation window in s</span>
-</div>
-<input
-	type="number"
-	placeholder="Aggregation window"
-	class="input input-bordered"
-	bind:value={$aggWindowSec}
-/>
+<main class="p-4">
+	<a class="text-4xl link link-hover" href="/">Microeye</a>
 
-<div class="label">
-	<span class="label-text">Aggregation function</span>
-</div>
-<select class="select select-bordered" bind:value={$aggFunction}>
-	{#each AGG_FUNCTIONS as aggFunction}
-		<option value={aggFunction}>{aggFunction}</option>
-	{/each}
-</select>
+	<div class="w-full h-[300px]">
+		<div bind:this={chart}></div>
+	</div>
+	<div class="flex flex-col gap-1">
+		<div class="label">
+			<span class="label-text">Name</span>
+		</div>
+		<select class="select select-bordered select-sm" bind:value={$queryName}>
+			{#each metricsNames as metricName}
+				<option value={metricName}>{metricName}</option>
+			{/each}
+		</select>
 
-<div class="label">
-	<span class="label-text">From</span>
-</div>
-<input type="number" placeholder="From" class="input input-bordered" bind:value={$fromSec} />
+		<div class="flex items-center">
+			<div class="label">
+				<span class="label-text">Refresh interval in s</span>
+			</div>
+			<input
+				type="number"
+				placeholder="Refresh interval"
+				class="input input-bordered input-sm"
+				bind:value={$refreshIntervalSec}
+				on:change={handleRefreshIntervalChange}
+			/>
+		</div>
+		<div class="flex items-center">
+			<div class="label">
+				<span class="label-text">Aggregation window in s</span>
+			</div>
+			<input
+				type="number"
+				placeholder="Aggregation window"
+				class="input input-bordered input-sm"
+				bind:value={$aggWindowSec}
+			/>
+		</div>
 
-<div class="label">
-	<span class="label-text">To</span>
-</div>
-<input type="number" placeholder="To" class="input input-bordered" bind:value={$toSec} />
+		<div class="flex items-center">
+			<div class="label">
+				<span class="label-text">Aggregation function</span>
+			</div>
+			<select class="select select-bordered select-sm" bind:value={$aggFunction}>
+				{#each AGG_FUNCTIONS as aggFunction}
+					<option value={aggFunction}>{aggFunction}</option>
+				{/each}
+			</select>
+		</div>
 
-<div class="label">
-	<span class="label-text">Relative</span>
-</div>
-<input type="checkbox" class="checkbox" bind:checked={$isRelative} />
+		<div class="flex items-center">
+			<div class="label">
+				<span class="label-text">Relative</span>
+			</div>
+			<input
+				type="checkbox"
+				class="checkbox checkbox-sm"
+				bind:checked={$isRelative}
+				on:change={handleRelativeChange}
+			/>
+		</div>
+
+		{#if $isRelative}
+			<div class="flex items-center">
+				<div class="label">
+					<span class="label-text">Left offset from now</span>
+				</div>
+				<input
+					type="number"
+					placeholder="From"
+					class="input input-bordered input-sm"
+					bind:value={$fromSec}
+				/>
+			</div>
+
+			<div class="flex items-center">
+				<div class="label">
+					<span class="label-text">Right offset from now</span>
+				</div>
+				<input
+					type="number"
+					placeholder="To"
+					class="input input-bordered input-sm"
+					bind:value={$toSec}
+				/>
+			</div>
+		{:else}
+			<div class="flex items-center">
+				<div class="label">
+					<span class="label-text">From</span>
+				</div>
+				<input
+					type="datetime-local"
+					placeholder="From"
+					class="input input-bordered input-sm"
+					bind:value={fromDateStr}
+					on:change={handleFromChange}
+				/>
+				<!-- bind:value={new Date($fromSec * 1000).toISOString()} -->
+			</div>
+
+			<div class="flex items-center">
+				<div class="label">
+					<span class="label-text">To</span>
+				</div>
+				<input
+					type="datetime-local"
+					placeholder="To"
+					class="input input-bordered input-sm"
+					bind:value={toDateStr}
+					on:change={handleToChange}
+				/>
+			</div>
+		{/if}
+	</div>
+</main>

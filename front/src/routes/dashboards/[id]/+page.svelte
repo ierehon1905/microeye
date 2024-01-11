@@ -1,12 +1,14 @@
 <script>
 	import { page } from '$app/stores';
 	import AutoDashboard from '$lib/components/AutoDashboard.svelte';
-	import Chart from '$lib/components/Chart.svelte';
-	import Dashboard from '$lib/components/Dashboard.svelte';
 	import { nowSec } from '$lib/time';
 
 	let id = $page.params.id;
 </script>
+
+<svelte:head>
+	<title>Microeye | Dashboards | {id}</title>
+</svelte:head>
 
 <main class="p-4">
 	<a class="text-4xl link link-hover" href="/">Microeye</a>

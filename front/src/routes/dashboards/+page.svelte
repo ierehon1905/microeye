@@ -7,6 +7,10 @@
 	let dashboardsPromise = fetchDashboards();
 </script>
 
+<svelte:head>
+	<title>Microeye | Dashboards</title>
+</svelte:head>
+
 <main class="p-4">
 	<div class="flex justify-between">
 		<a class="text-4xl link link-hover" href="/">Microeye</a>

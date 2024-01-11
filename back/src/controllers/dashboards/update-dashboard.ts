@@ -1,8 +1,17 @@
 import { Request, Response } from "express";
 import { Repository } from "../../repository";
 import { NDashboard } from "../../types";
+import { createValidationGuard } from "../../utilities/validate";
 
-export async function updateDashboard(
+const validateUpdateDashboard = createValidationGuard({
+    id: {
+        in: ["params"],
+        isString: true,
+        notEmpty: true,
+    },
+});
+
+async function updateDashboard(
     req: Request<
         {
             id: string;
@@ -12,8 +21,8 @@ export async function updateDashboard(
     >,
     res: Response
 ) {
-    console.log(req.body);
-
     const result = await Repository.updateDashboard(req.params.id, req.body);
     res.send(result);
 }
+
+export default [validateUpdateDashboard, updateDashboard];

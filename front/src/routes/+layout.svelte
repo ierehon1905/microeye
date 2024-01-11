@@ -1,5 +1,9 @@
 <script>
-  import "../app.css";
+	import '../app.css';
 </script>
+
+<svelte:head>
+	<title>Microeye</title>
+</svelte:head>
 
 <slot />

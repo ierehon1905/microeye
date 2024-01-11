@@ -1,12 +1,7 @@
-import Yagr from '@gravity-ui/yagr';
-import type {
-	IPaginateParams,
-	IWithPagination,
-	MergedLines,
-	MetricsRequest,
-	NDashboard
-} from './types';
+import Yagr, { type YagrConfig } from '@gravity-ui/yagr';
+import { getSimpleColor } from './color';
 import { HOST } from './constants';
+import type { IWithPagination, MergedLines, MetricsRequest, NDashboard } from './types';
 
 export async function fetchMetrics(request: MetricsRequest): Promise<MergedLines> {
 	const res: MergedLines = await fetch(`${HOST}/metrics`, {
@@ -27,11 +22,12 @@ export async function fetchAndDraw(
 ): Promise<Yagr> {
 	const res = await fetchMetrics(request);
 
-	const series = res.lines.map((line) => {
+	const series: YagrConfig['series'] = res.lines.map((line, lineIndex) => {
 		return {
 			id: line.name + JSON.stringify(line.labels),
 			data: line.values,
-			name: line.name + JSON.stringify(line.labels)
+			name: line.name + JSON.stringify(line.labels),
+			color: getSimpleColor(lineIndex, res.lines.length)
 		};
 	});
 
@@ -44,6 +40,9 @@ export async function fetchAndDraw(
 				series: {
 					spanGaps: true,
 					type: 'line'
+				},
+				appearance: {
+					theme: 'dark'
 				}
 			}
 		});

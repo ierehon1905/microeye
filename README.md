@@ -17,3 +17,25 @@ curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a"
 ```
 
 or use example pushers from `./pusher` directory.
+
+To push metrics from js use or make your own pusher
+
+```js
+import axios from "axios";
+
+class Pusher {
+  constructor(host) {
+    this.host = host;
+  }
+
+  async pushMetric(name, value, labels) {
+    await axios.post(`${this.host}/push`, {
+      name,
+      value,
+      labels,
+    });
+  }
+}
+
+export default Pusher;
+```

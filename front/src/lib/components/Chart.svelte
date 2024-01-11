@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Yagr from '@gravity-ui/yagr';
+	import Yagr, { type YagrConfig } from '@gravity-ui/yagr';
 	import { onMount } from 'svelte';
 
 	import type { MergedLines } from '$lib/types';
@@ -36,6 +36,9 @@
 				series: {
 					spanGaps: true,
 					type: 'line'
+				},
+				appearance: {
+					theme: 'dark'
 				}
 			}
 		});
@@ -43,11 +46,12 @@
 
 	$: {
 		if (yagr) {
-			const series = data.lines.map((line) => {
+			const series: YagrConfig['series'] = data.lines.map((line) => {
 				return {
 					id: line.name + JSON.stringify(line.labels),
 					data: line.values,
-					name: line.name + JSON.stringify(line.labels)
+					name: line.name + JSON.stringify(line.labels),
+					color: 'ff0000'
 				};
 			});
 

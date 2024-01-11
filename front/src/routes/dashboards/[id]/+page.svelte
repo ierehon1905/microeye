@@ -1,7 +1,6 @@
 <script>
 	import { page } from '$app/stores';
 	import AutoDashboard from '$lib/components/AutoDashboard.svelte';
-	import { nowSec } from '$lib/time';
 
 	let id = $page.params.id;
 </script>

@@ -1,14 +1,17 @@
 import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
+
 import { connection } from "./db";
-import pushMetric from "./controllers/metrics/push-metric";
-import fetchMetrics from "./controllers/metrics/fetch-metrics";
-import fetchDashboards from "./controllers/dashboards/fetch-dashboards";
-import fetchDashboard from "./controllers/dashboards/fetch-dashboard";
-import updateDashboard from "./controllers/dashboards/update-dashboard";
-import deleteDashboard from "./controllers/dashboards/delete-dashboard";
-import fetchMetricsNames from "./controllers/metrics/fetch-metrics-names";
 import { Repository } from "./repository";
+
+import deleteDashboard from "./controllers/dashboards/delete-dashboard";
+import fetchDashboard from "./controllers/dashboards/fetch-dashboard";
+import fetchDashboards from "./controllers/dashboards/fetch-dashboards";
+import updateDashboard from "./controllers/dashboards/update-dashboard";
+import fetchMetrics from "./controllers/metrics/fetch-metrics";
+import fetchMetricsNames from "./controllers/metrics/fetch-metrics-names";
+import pushMetric from "./controllers/metrics/push-metric";
+import logger from "./logger";
 
 async function main() {
     const app = express();
@@ -18,6 +21,17 @@ async function main() {
     const api = express.Router();
 
     api.use(cors(), express.json());
+
+    api.use((req, res, next) => {
+        logger.info({
+            method: req.method,
+            url: req.url,
+            body: req.body,
+            query: req.query,
+            params: req.params,
+        });
+        next();
+    });
 
     api.get("/metrics/names", ...fetchMetricsNames);
     api.post("/metrics", ...fetchMetrics);
@@ -30,7 +44,7 @@ async function main() {
 
     app.use(api);
 
-    console.log("Starting server...");
+    logger.info("Starting server...");
     await connection.migrate.latest();
 
     const mustStartFront = process.env.MICROEYE_MUST_START_FRONT === "true";
@@ -45,10 +59,12 @@ async function main() {
     }
 
     app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+        logger.info(`Server is running on port ${port}`);
     });
 
     if (process.env.MICROEYE_FAKE_DATA === "true") {
+        console.warn("Starting fake data generator");
+
         let start = Date.now();
         while (true) {
             await new Promise((resolve) => setTimeout(resolve, 1000));

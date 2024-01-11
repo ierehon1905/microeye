@@ -10,7 +10,7 @@
     "scripts": {
         "dev": "tsc-watch --onSuccess \"npm run start\"",
         "build": "tsc -p .",
-        "start": "node --es-module-specifier-resolution=node dist",
+        "start": "node --no-warnings --es-module-specifier-resolution=node dist",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "",
@@ -27,6 +27,7 @@
         "express-validator": "^7.0.1",
         "knex": "^3.1.0",
         "knex-paginate": "^3.1.1",
-        "pg": "^8.11.3"
+        "pg": "^8.11.3",
+        "pino": "^8.17.2"
     }
 }

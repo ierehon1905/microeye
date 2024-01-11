@@ -26,6 +26,7 @@ COPY ./front/vite.config.ts .
 COPY ./front/src ./src
 COPY ./front/static ./static
 
+ENV PUBLIC_MICROEYE_SAMEORIGIN=1
 RUN npm ci
 RUN npm run build
 
@@ -67,6 +68,7 @@ COPY --from=builder /app/front/package.json ./
 ENV MICROEYE_FRONT_HANDLER_PATH=/app/front/build/handler.js
 ENV MICROEYE_DB_NAME=postgres
 ENV MICROEYE_MUST_START_FRONT=true
+ENV PUBLIC_MICROEYE_SAMEORIGIN=1
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

@@ -1,7 +1,11 @@
 <script lang="ts">
 	const links = [
-		{ name: 'Space', href: '/space', description: 'Space description' },
-		{ name: 'Dashboards', href: '/dashboards', description: 'Dashboards description' }
+		{ name: 'Space', href: '/space', description: 'Quickly explore your metrics' },
+		{
+			name: 'Dashboards',
+			href: '/dashboards',
+			description: 'Create and view your own charts dashboards'
+		}
 	];
 </script>
 

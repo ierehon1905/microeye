@@ -33,7 +33,7 @@ async function customFetch<T>(url: string, options: RequestInit): Promise<Result
 export async function fetchMetrics(
 	request: MetricsRequest
 ): Promise<Result<MergedLines, ApiError>> {
-	return customFetch<MergedLines>(`${HOST}/metrics`, {
+	return customFetch<MergedLines>(`${HOST}/api/metrics`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ export async function fetchAndDraw(
 export async function fetchDashboard(
 	dashId: string
 ): Promise<Result<NDashboard.Dashboard, ApiError>> {
-	return customFetch<NDashboard.Dashboard>(`${HOST}/dashboards/${dashId}`, {
+	return customFetch<NDashboard.Dashboard>(`${HOST}/api/dashboards/${dashId}`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json'
@@ -103,7 +103,7 @@ export async function fetchDashboard(
 export async function fetchDashboards(): Promise<
 	Result<IWithPagination<NDashboard.Dashboard>, ApiError>
 > {
-	return customFetch<IWithPagination<NDashboard.Dashboard>>(`${HOST}/dashboards`, {
+	return customFetch<IWithPagination<NDashboard.Dashboard>>(`${HOST}/api/dashboards`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json'
@@ -115,7 +115,7 @@ export async function updateDashboard(
 	dashId: string,
 	dashboard: NDashboard.DashboardUpdate
 ): Promise<Result<Unit, ApiError>> {
-	return await customFetch<Unit>(`${HOST}/dashboards/${dashId}`, {
+	return await customFetch<Unit>(`${HOST}/api/dashboards/${dashId}`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ export async function updateDashboard(
 export async function createDashboard(
 	dashboard: NDashboard.DashboardCreate
 ): Promise<Result<Unit, ApiError>> {
-	return await customFetch<Unit>(`${HOST}/dashboards`, {
+	return await customFetch<Unit>(`${HOST}/api/dashboards`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -137,7 +137,7 @@ export async function createDashboard(
 }
 
 export async function deleteDashboard(dashId: string): Promise<Result<Unit, ApiError>> {
-	return await customFetch<Unit>(`${HOST}/dashboards/${dashId}`, {
+	return await customFetch<Unit>(`${HOST}/api/dashboards/${dashId}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json'
@@ -146,7 +146,7 @@ export async function deleteDashboard(dashId: string): Promise<Result<Unit, ApiE
 }
 
 export async function fetchMetricsNames(): Promise<Result<string[], ApiError>> {
-	return await customFetch<string[]>(`${HOST}/metrics/names`, {
+	return await customFetch<string[]>(`${HOST}/api/metrics/names`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json'

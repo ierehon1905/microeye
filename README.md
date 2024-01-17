@@ -4,8 +4,16 @@
 
 ![Microeye](./docs/thumbnail.jpg)
 
+To run with basic auth use the following command
+
 ```bash
-docker run -p 3000:3000 -v microeye_data:/var/lib/postgresql/data microeye
+docker run -p 3000:3000 -e MICROEYE_ADMIN_PASSWORD=my_super_secret_password ierehon1905/microeye:latest
+```
+
+or the following to disable auth run
+
+```bash
+docker run -p 3000:3000 -e MICROEYE_DISABLE_AUTH=true ierehon1905/microeye:latest
 ```
 
 Open the browser to see ui.
@@ -48,7 +56,7 @@ services:
   monitoring:
     image: ierehon1905/microeye:latest
     ports:
-      - "30000:3000"
+      - "3000:3000"
     volumes:
       - monitoring_data:/var/lib/postgresql/data
 

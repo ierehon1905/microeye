@@ -68,7 +68,10 @@ COPY --from=builder /app/front/package.json ./
 ENV MICROEYE_FRONT_HANDLER_PATH=/app/front/build/handler.js
 ENV MICROEYE_DB_NAME=postgres
 ENV MICROEYE_MUST_START_FRONT=true
+ENV NODE_ENV=production
 ENV PUBLIC_MICROEYE_SAMEORIGIN=1
+ENV MICROEYE_ADMIN_PASSWORD=microeye
+ENV MICROEYE_DISABLE_AUTH=false
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

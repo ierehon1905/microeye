@@ -1,18 +1,23 @@
 import cors from "cors";
-import express from "express";
+import express, { Request } from "express";
+import basicAuth from "express-basic-auth";
 
 import { connection } from "./db";
 import { Repository } from "./repository";
 
-import deleteDashboard from "./controllers/dashboards/delete-dashboard";
-import fetchDashboard from "./controllers/dashboards/fetch-dashboard";
-import fetchDashboards from "./controllers/dashboards/fetch-dashboards";
-import updateDashboard from "./controllers/dashboards/update-dashboard";
+import dashboardApi from "./controllers/dashboards";
 import fetchMetrics from "./controllers/metrics/fetch-metrics";
 import fetchMetricsNames from "./controllers/metrics/fetch-metrics-names";
 import pushMetric from "./controllers/metrics/push-metric";
 import logger from "./logger";
-import dashboardApi from "./controllers/dashboards";
+import {
+    MICROEYE_ADMIN_PASSWORD,
+    MICROEYE_DISABLE_AUTH,
+    MICROEYE_FAKE_DATA,
+    MICROEYE_FRONT_HANDLER_PATH,
+    MICROEYE_MUST_START_FRONT,
+    NODE_ENV,
+} from "./constants";
 
 async function main() {
     const app = express();
@@ -21,9 +26,28 @@ async function main() {
 
     const api = express.Router();
 
-    api.use(cors(), express.json());
+    if (NODE_ENV === "development") {
+        logger.info("Enabling CORS");
+        app.use(cors());
+    } else if (!MICROEYE_DISABLE_AUTH) {
+        logger.info("Enabling basic auth");
+        app.use(
+            basicAuth({
+                users: {
+                    admin: MICROEYE_ADMIN_PASSWORD,
+                },
+                challenge: true,
+                realm: "microeye",
+                unauthorizedResponse: {
+                    message: "Unauthorized",
+                },
+            })
+        );
+    }
 
-    api.use((req, res, next) => {
+    api.use(express.json());
+
+    api.use((req, _res, next) => {
         logger.info({
             method: req.method,
             url: req.url,
@@ -40,17 +64,13 @@ async function main() {
     api.post("/push", ...pushMetric);
     api.use(dashboardApi);
 
-    app.use(api);
+    app.use("/api", api);
 
     logger.info("Starting server...");
     await connection.migrate.latest();
 
-    const mustStartFront = process.env.MICROEYE_MUST_START_FRONT === "true";
-    if (mustStartFront) {
-        const frontHandlerPath =
-            process.env.MICROEYE_FRONT_HANDLER_PATH ||
-            "/Users/leon/dev/microeye/front/build/handler.js";
-
+    if (MICROEYE_MUST_START_FRONT) {
+        const frontHandlerPath = MICROEYE_FRONT_HANDLER_PATH;
         const { handler } = await import(frontHandlerPath);
 
         app.use(handler);
@@ -60,8 +80,8 @@ async function main() {
         logger.info(`Server is running on port ${port}`);
     });
 
-    if (process.env.MICROEYE_FAKE_DATA === "true") {
-        console.warn("Starting fake data generator");
+    if (MICROEYE_FAKE_DATA) {
+        logger.info("Starting fake data generator");
 
         let start = Date.now();
         while (true) {

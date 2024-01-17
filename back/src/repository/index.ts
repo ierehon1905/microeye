@@ -73,7 +73,13 @@ export const Repository = {
             .first();
     },
     async createDashboard(dashboard: NDashboard.DashboardCreate) {
-        await connection<NDashboard.Dashboard>("dashboards").insert(dashboard);
+        await connection<NDashboard.Dashboard>("dashboards").insert({
+            id: dashboard.id,
+            title: dashboard.title,
+            // @ts-ignore
+            items: JSON.stringify(dashboard.items),
+            version: 1,
+        });
     },
     async updateDashboard(id: string, dashboard: NDashboard.DashboardUpdate) {
         await connection<NDashboard.Dashboard>("dashboards")

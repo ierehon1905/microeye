@@ -1,4 +1,5 @@
 <script>
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AutoDashboard from '$lib/components/AutoDashboard.svelte';
 
@@ -10,7 +11,17 @@
 </svelte:head>
 
 <main class="p-4">
-	<a class="text-4xl link link-hover" href="/">Microeye</a>
+	<div class="flex justify-between">
+		<a class="text-4xl link link-hover" href="/">Microeye</a>
+		<button
+			class="btn btn-sm btn-primary"
+			on:click={() => {
+				goto(`/dashboards/${id}/edit`);
+			}}
+		>
+			Edit
+		</button>
+	</div>
 
 	<div class="breadcrumbs">
 		<ul>

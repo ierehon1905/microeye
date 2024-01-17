@@ -18,6 +18,7 @@
 		refreshIntervalSec,
 		toSec
 	} from './params';
+	import { addToast } from '$lib/components/Toast/toast';
 
 	let refreshIntervalId: number | undefined;
 	let queryLabels: Record<string, string | number> = {};
@@ -41,7 +42,15 @@
 				},
 				yagr,
 				chart
-			);
+			).then((newYagr) => {
+				if (newYagr.isErr) {
+					addToast({
+						id: 'space-metrics-fetch-error',
+						text: `Failed to fetch metrics: ${newYagr.error.message}`,
+						type: 'error'
+					});
+				}
+			});
 		}, $refreshIntervalSec! * 1000);
 	}
 
@@ -58,7 +67,18 @@
 			yagr,
 			chart
 		).then((newYagr) => {
-			yagr = newYagr;
+			newYagr.match({
+				Ok(value) {
+					yagr = value;
+				},
+				Err(error) {
+					addToast({
+						id: 'space-metrics-fetch-error',
+						text: `Failed to fetch metrics: ${error.message}`,
+						type: 'error'
+					});
+				}
+			});
 		});
 
 		if ($refreshIntervalSec && $refreshIntervalSec > 0) {
@@ -66,10 +86,21 @@
 		}
 
 		fetchMetricsNames().then((names) => {
-			metricsNames = names;
-			if (!names.includes($queryName!)) {
-				$queryName = names[0];
-			}
+			names.match({
+				Ok(value) {
+					metricsNames = value;
+					if (!value.includes($queryName!)) {
+						$queryName = value[0];
+					}
+				},
+				Err(error) {
+					addToast({
+						id: 'space-metrics-names-fetch-error',
+						text: `Failed to fetch metrics names: ${error.message}`,
+						type: 'error'
+					});
+				}
+			});
 		});
 
 		return () => {
@@ -77,37 +108,6 @@
 			yagr.dispose();
 		};
 	});
-
-	// $: if ($refreshIntervalSec && $refreshIntervalSec > 0) {
-	// 	clearInterval(refreshIntervalId);
-	// 	refreshIntervalId = setInterval(() => {
-	// 		fetchAndDraw(
-	// 			{
-	// 				name: $queryName!,
-	// 				labels: queryLabels,
-	// 				aggWindowSec: $aggWindowSec!,
-	// 				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-	// 			},
-	// 			yagr,
-	// 			chart
-	// 		).then((newYagr) => {
-	// 			yagr = newYagr;
-	// 		});
-	// 	}, $refreshIntervalSec * 1000);
-	// } else {
-	// 	clearInterval(refreshIntervalId);
-	// }
-
-	// $: yagr &&
-	// 	fetchAndDraw(
-	// 		{
-	// 			name: $queryName!,
-	// 			labels: queryLabels,
-	// 			...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-	// 		},
-	// 		yagr,
-	// 		chart
-	// 	);
 
 	let fromDateStr = new Date($fromSec! * 1000).toISOString().replace(/\..*/, '');
 
@@ -147,7 +147,10 @@
 </svelte:head>
 
 <main class="p-4">
-	<a class="text-4xl link link-hover" href="/">Microeye</a>
+	<div class="mb-4 text-4xl">
+		<a class="link link-hover" href="/">&lt;</a>
+		Space
+	</div>
 
 	<div class="w-full h-[300px]">
 		<div bind:this={chart}></div>

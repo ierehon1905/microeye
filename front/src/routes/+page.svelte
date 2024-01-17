@@ -6,16 +6,18 @@
 </script>
 
 <main class="p-4">
-	<a class="text-4xl link link-hover" href="/">Microeye</a>
+	<div class="mb-4">
+		<a class="text-4xl link link-hover" href="/">Microeye</a>
+	</div>
 
-	<div class="flex gap-2 mt-2">
+	<div class="grid gap-2">
 		{#each links as link}
 			<a
 				href={link.href}
 				class="border border-gray-600 rounded-md p-2
-					   group"
+					   hover:border-gray-400"
 			>
-				<div class="text-xl group-hover:underline">{link.name}</div>
+				<div class="text-xl">{link.name}</div>
 				<p class="text-gray-500">{link.description}</p>
 			</a>
 		{/each}

@@ -12,6 +12,7 @@ import fetchMetrics from "./controllers/metrics/fetch-metrics";
 import fetchMetricsNames from "./controllers/metrics/fetch-metrics-names";
 import pushMetric from "./controllers/metrics/push-metric";
 import logger from "./logger";
+import dashboardApi from "./controllers/dashboards";
 
 async function main() {
     const app = express();
@@ -37,10 +38,7 @@ async function main() {
     api.post("/metrics", ...fetchMetrics);
 
     api.post("/push", ...pushMetric);
-    api.get("/dashboards/:id", ...fetchDashboard);
-    api.post("/dashboards/:id", ...updateDashboard);
-    api.delete("/dashboards/:id", ...deleteDashboard);
-    api.get("/dashboards", ...fetchDashboards);
+    api.use(dashboardApi);
 
     app.use(api);
 

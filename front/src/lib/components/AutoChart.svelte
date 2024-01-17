@@ -29,7 +29,11 @@
 			aggFunction: aggFunction,
 			...getAbsoluteTime(fromSec, toSec, isRelative)
 		}).then((res) => {
-			data = res;
+			const time = getAbsoluteTime(fromSec, toSec, isRelative);
+			data = res.unwrapOr({
+				lines: [],
+				timestampsSec: [time.fromSec, time.toSec]
+			});
 		});
 
 		if (refreshIntervalSec && refreshIntervalSec > 0) {
@@ -41,7 +45,11 @@
 					aggFunction: aggFunction,
 					...getAbsoluteTime(fromSec, toSec, isRelative)
 				}).then((res) => {
-					data = res;
+					const time = getAbsoluteTime(fromSec, toSec, isRelative);
+					data = res.unwrapOr({
+						lines: [],
+						timestampsSec: [time.fromSec, time.toSec]
+					});
 				});
 			}, refreshIntervalSec * 1000);
 		}
@@ -50,37 +58,6 @@
 			clearInterval(refreshIntervalId);
 		};
 	});
-
-	// $: if ($refreshIntervalSec && $refreshIntervalSec > 0) {
-	// 	clearInterval(refreshIntervalId);
-	// 	refreshIntervalId = setInterval(() => {
-	// 		fetchAndDraw(
-	// 			{
-	// 				name: $queryName!,
-	// 				labels: queryLabels,
-	// 				aggWindowSec: $aggWindowSec!,
-	// 				...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-	// 			},
-	// 			yagr,
-	// 			chart
-	// 		).then((newYagr) => {
-	// 			yagr = newYagr;
-	// 		});
-	// 	}, $refreshIntervalSec * 1000);
-	// } else {
-	// 	clearInterval(refreshIntervalId);
-	// }
-
-	// $: yagr &&
-	// 	fetchAndDraw(
-	// 		{
-	// 			name: $queryName!,
-	// 			labels: queryLabels,
-	// 			...getAbsoluteTime($fromSec!, $toSec!, $isRelative)
-	// 		},
-	// 		yagr,
-	// 		chart
-	// 	);
 </script>
 
 <Chart {data} />

@@ -1,51 +1,79 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { fetchDashboard, updateDashboard } from '$lib/api';
+	import { addToast } from '$lib/components/Toast/toast';
 	import type { NDashboard } from '$lib/types';
-	import { onMount } from 'svelte';
-	import { JSONEditor, type Content, isJSONContent, toJSONContent } from 'svelte-jsoneditor';
-	// import {no} from 'daisyui';
+	import {
+		JSONEditor,
+		Mode as JSONEditorMode,
+		toJSONContent,
+		type Content
+	} from 'svelte-jsoneditor';
 
-	// notifi
-	// import { startWindToast } from '@mariojgt/wind-notify/packages/index.js';
+	let dashboardId = $page.params.id;
 
-	let dashId = $page.params.id;
-
-	let dashboardData: Content;
+	let dashboardDataContent: Content;
 	let savedDashboardData: NDashboard.Dashboard;
-	let dashboardPromise = fetchDashboard(dashId).then((data) => {
-		dashboardData = { json: data } as Content;
-		savedDashboardData = structuredClone(data);
-		return data;
+	let dashboardPromise = fetchDashboard(dashboardId).then((data) => {
+		return data.match<Promise<void>>({
+			async Ok(value) {
+				dashboardDataContent = { json: value } as Content;
+				savedDashboardData = structuredClone(value);
+			},
+			async Err(error) {
+				console.error(error);
+				addToast({
+					id: 'dashboard-fetch-error',
+					text: `Failed to fetch dashboard: ${error.message}`,
+					type: 'error'
+				});
+				await goto('/dashboards');
+			}
+		});
 	});
 
-	function save() {
-		if (!isJSONContent(dashboardData)) return;
-		const json = toJSONContent(dashboardData);
-		updateDashboard(dashId, json.json as NDashboard.Dashboard).then(() => {
+	async function save() {
+		const json = toJSONContent(dashboardDataContent);
+		await updateDashboard(dashboardId, json.json as NDashboard.Dashboard).then(() => {
 			savedDashboardData = structuredClone(json.json as NDashboard.Dashboard);
 		});
 	}
 
 	function unload(e: BeforeUnloadEvent) {
-		if (!isJSONContent(dashboardData)) return;
-		const json = toJSONContent(dashboardData);
+		const json = toJSONContent(dashboardDataContent);
 		if (JSON.stringify(json.json) !== JSON.stringify(savedDashboardData)) {
 			e.preventDefault();
 			e.returnValue = '';
 			return '...';
 		}
 	}
+
+	// $: dashboard = (dashboardDataContent && toJSONContent(dashboardDataContent).json) as
+	// 	| NDashboard.Dashboard
+	// 	| undefined;
 </script>
 
 <svelte:head>
-	<title>Microeye | Dashboards | {dashId} | Edit</title>
+	<title>Microeye | Dashboards | {dashboardId} | Edit</title>
 </svelte:head>
 
 <svelte:window on:beforeunload={unload} />
 
 <main class="p-4">
-	<a class="text-4xl link link-hover" href="/">Microeye</a>
+	<div class="flex justify-between">
+		<a class="text-4xl link link-hover" href={`/dashboards/${dashboardId}`}>Microeye</a>
+		<button
+			class="btn btn-sm btn-primary"
+			on:click={() => {
+				save().then(() => {
+					goto(`/dashboards/${dashboardId}`);
+				});
+			}}
+		>
+			Save
+		</button>
+	</div>
 
 	<div class="breadcrumbs">
 		<ul>
@@ -61,9 +89,9 @@
 
 	{#await dashboardPromise}
 		<p>Loading...</p>
-	{:then dashboard}
+	{:then}
 		<div class="grid grid-cols-6 auto-rows-[30vh] gap-2">
-			{#each dashboardData.json.items as item}
+			{#each toJSONContent(dashboardDataContent).json?.items || [] as item}
 				<div
 					class="border border-gray-600 rounded-md overflow-hidden
 							p-2"
@@ -83,6 +111,5 @@
 		<p>{error.message}</p>
 	{/await}
 	<div class="divider"></div>
-	<button class="btn btn-primary" on:click={save}>Save</button>
-	<JSONEditor bind:content={dashboardData} />
+	<JSONEditor mode={JSONEditorMode.text} bind:content={dashboardDataContent} />
 </main>

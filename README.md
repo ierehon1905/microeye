@@ -43,7 +43,7 @@ class Pusher {
   }
 
   async pushMetric(name, value, labels) {
-    await axios.post(`${this.host}/push`, {
+    await axios.post(`${this.host}/api/metrics/push`, {
       name,
       value,
       labels,

@@ -48,13 +48,17 @@ async function main() {
         );
     }
 
-    api.use(express.json());
+    api.use(
+        express.json({
+            limit: "50mb",
+        })
+    );
 
     api.use((req, _res, next) => {
         logger.info({
             method: req.method,
             url: req.url,
-            body: req.body,
+            // body: req.body,
             query: req.query,
             params: req.params,
         });

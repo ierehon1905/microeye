@@ -27,6 +27,7 @@ const validatePushMetrics = createValidationGuard({
     },
     "metrics.*.timestampsSec.*": {
         isNumeric: true,
+        toInt: true,
     },
 });
 

@@ -81,7 +81,7 @@ export const Repository = {
                         unnest(?::float[]) as value,
                         unnest(?::int8[]) as created_at
                     ON CONFLICT (created_at, name, labels)
-                        DO UPDATE SET value = EXCLUDED.value
+                        DO NOTHING
                     `,
                     [
                         metric.name,

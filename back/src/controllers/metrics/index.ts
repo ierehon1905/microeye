@@ -7,8 +7,8 @@ import pushMetrics from "./push-metrics";
 const metricsApi = express.Router();
 
 metricsApi.get("/names", ...fetchMetricsNames);
-metricsApi.post("/", ...fetchMetrics);
 metricsApi.post("/push-many", ...pushMetrics);
 metricsApi.post("/push", ...pushMetric);
+metricsApi.post("/", ...fetchMetrics);
 
 export default metricsApi;

@@ -1,15 +1,10 @@
 import cors from "cors";
-import express, { Request } from "express";
+import express from "express";
 import basicAuth from "express-basic-auth";
 
 import { connection } from "./db";
 import { Repository } from "./repository";
 
-import dashboardApi from "./controllers/dashboards";
-import fetchMetrics from "./controllers/metrics/fetch-metrics";
-import fetchMetricsNames from "./controllers/metrics/fetch-metrics-names";
-import pushMetric from "./controllers/metrics/push-metric";
-import logger from "./logger";
 import {
     MICROEYE_ADMIN_PASSWORD,
     MICROEYE_DISABLE_AUTH,
@@ -18,7 +13,9 @@ import {
     MICROEYE_MUST_START_FRONT,
     NODE_ENV,
 } from "./constants";
+import dashboardApi from "./controllers/dashboards";
 import metricsApi from "./controllers/metrics";
+import logger from "./logger";
 
 process.title = "microeye";
 

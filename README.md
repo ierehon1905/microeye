@@ -21,7 +21,13 @@ Open the browser to see ui.
 To push metrics run
 
 ```bash
-curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a":"b"},"value":1}' http://localhost:3000/push
+curl -X POST -H "Content-Type: application/json" -d '{"name":"cpu","labels":{"a":"b"},"value":1}' http://localhost:3000/api/metrics/push
+```
+
+or to push multiple metrics
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"metrics":[{"name":"test","labels":{"label":"value"},"values":[1,2,3],"timestampsSec":[1705592323,1705592353,1705592423]}]}' http://localhost:3000/api/metrics/push-many
 ```
 
 or use example pushers from `./pusher` directory.

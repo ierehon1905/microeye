@@ -4,7 +4,7 @@ import { MetricLine, NDashboard } from "../types";
 import { fetchPreparedMetrics } from "./fetch-prepared-metrics";
 
 type Metrics = {
-    created_at: Date;
+    created_at: number;
     name: string;
     labels: Record<string, string | number>;
     value: number;
@@ -46,19 +46,54 @@ export const Repository = {
         return result.rows;
     },
     fetchPreparedMetrics,
-    async pushMetrics(
+    async pushMetric(
         name: string,
         labels: Record<string, string | number>,
-        value: number
+        value: number,
+        created_at?: number
     ): Promise<void> {
         await connection<Metrics>("metrics")
             .insert({
                 name,
                 labels,
                 value,
+                created_at,
             })
             .onConflict(["created_at", "name", "labels"])
             .merge();
+    },
+    async pushManyMetrics(
+        metrics: {
+            name: string;
+            labels: Record<string, string | number>;
+            values: number[];
+            timestampsSec: number[];
+        }[]
+    ): Promise<void> {
+        await connection.transaction(async (trx) => {
+            const promises = metrics.map(async (metric) => {
+                await trx.raw(
+                    /* sql */ `
+                    INSERT INTO metrics (name, labels, value, created_at)
+                    SELECT
+                        ? as name,
+                        ?::jsonb as labels,
+                        unnest(?::float[]) as value,
+                        unnest(?::int8[]) as created_at
+                    ON CONFLICT (created_at, name, labels)
+                        DO UPDATE SET value = EXCLUDED.value
+                    `,
+                    [
+                        metric.name,
+                        JSON.stringify(metric.labels),
+                        metric.values,
+                        metric.timestampsSec,
+                    ]
+                );
+            });
+
+            await Promise.all(promises);
+        });
     },
     async fetchDashboards(
         pagination: IPaginateParams

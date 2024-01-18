@@ -3,7 +3,7 @@ import { Repository } from "../../repository";
 import { PushMetricRequest } from "../../types";
 import { createValidationGuard } from "../../utilities/validate";
 
-const validateDeleteDashboard = createValidationGuard({
+const validatePushMetric = createValidationGuard({
     name: {
         in: ["body"],
         isString: true,
@@ -19,18 +19,24 @@ const validateDeleteDashboard = createValidationGuard({
         isNumeric: true,
         notEmpty: true,
     },
+    timestampSec: {
+        in: ["body"],
+        isNumeric: true,
+        optional: true,
+    },
 });
 
 async function pushMetric(
     req: Request<{}, {}, PushMetricRequest>,
     res: Response
 ) {
-    await Repository.pushMetrics(
+    await Repository.pushMetric(
         req.body.name,
         req.body.labels,
-        req.body.value
+        req.body.value,
+        req.body.timestampSec
     );
     res.send();
 }
 
-export default [validateDeleteDashboard, pushMetric];
+export default [validatePushMetric, pushMetric];

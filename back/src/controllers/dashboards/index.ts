@@ -7,10 +7,10 @@ import createDashboard from "./create-dashboard";
 
 const dashboardApi = express.Router();
 
-dashboardApi.get("/dashboards/:id", ...fetchDashboard);
-dashboardApi.post("/dashboards/:id", ...updateDashboard);
-dashboardApi.delete("/dashboards/:id", ...deleteDashboard);
-dashboardApi.post("/dashboards", ...createDashboard);
-dashboardApi.get("/dashboards", ...fetchDashboards);
+dashboardApi.get("/:id", ...fetchDashboard);
+dashboardApi.post("/:id", ...updateDashboard);
+dashboardApi.delete("/:id", ...deleteDashboard);
+dashboardApi.post("/", ...createDashboard);
+dashboardApi.get("/", ...fetchDashboards);
 
 export default dashboardApi;

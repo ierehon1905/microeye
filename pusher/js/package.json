@@ -2,20 +2,8 @@
   "name": "microeye-puhser",
   "version": "0.0.0",
   "description": "",
-  "main": "index.cjs",
-  "types": "index.d.cts",
-  "exports": {
-    ".": {
-      "types": {
-        "default": "./index.d.cts",
-        "import": "./index.d.mts"
-      },
-      "default": {
-        "default": "./index.cjs",
-        "import": "./index.mjs"
-      }
-    }
-  },
+  "main": "index.mjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -18,6 +18,9 @@ import {
     MICROEYE_MUST_START_FRONT,
     NODE_ENV,
 } from "./constants";
+import metricsApi from "./controllers/metrics";
+
+process.title = "microeye";
 
 async function main() {
     const app = express();
@@ -58,11 +61,8 @@ async function main() {
         next();
     });
 
-    api.get("/metrics/names", ...fetchMetricsNames);
-    api.post("/metrics", ...fetchMetrics);
-
-    api.post("/push", ...pushMetric);
-    api.use(dashboardApi);
+    api.use("/dashboards", dashboardApi);
+    api.use("/metrics", metricsApi);
 
     app.use("/api", api);
 
@@ -87,7 +87,7 @@ async function main() {
         while (true) {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            await Repository.pushMetrics(
+            await Repository.pushMetric(
                 "test",
                 {},
                 ((Date.now() - start) / 1000) % 60

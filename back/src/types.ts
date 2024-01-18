@@ -73,11 +73,14 @@ export type PushMetricRequest = {
     name: string;
     labels: Record<string, string>;
     value: number;
+    timestampSec?: number;
 };
 
-// export type PaginatedResponse<T> = {
-//     total: number;
-//     items: T[];
-//     page: number;
-//     size: number;
-// };
+export type PushMetricsRequest = {
+    metrics: {
+        name: string;
+        labels: Record<string, string>;
+        values: number[];
+        timestampsSec: number[];
+    }[];
+};
